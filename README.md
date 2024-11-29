@@ -1,10 +1,8 @@
 # Portfolio Management System
 
-<p align="center"><img src="https://via.placeholder.com/400" width="400" alt="Portfolio Management System Logo"></p>
-
 ## About Portfolio Management System
 
-Portfolio Management System is a web application designed to help users manage their projects and portfolios efficiently. It provides features such as project creation, editing, deletion, and image uploads, all within an intuitive and user-friendly interface.
+Portfolio Management System is a web application designed to help developers manage their portfolios efficiently. It provides features such as project creation, editing, deletion, and image uploads, all within an intuitive and user-friendly interface. The system also allows developers to showcase their skills, works, contact information, and about section. In the future, a blog feature may be added where guests can react or comment.
 
 ## Features
 
@@ -12,6 +10,11 @@ Portfolio Management System is a web application designed to help users manage t
 -   **Image Uploads**: Upload images for each project to visually represent your work.
 -   **Responsive Design**: The application is fully responsive and works on all devices.
 -   **Real-time Updates**: Get real-time updates on your projects.
+-   **Skills Display**: Showcase your skills and expertise.
+-   **Works Showcase**: Display your completed works and projects.
+-   **Contact Information**: Provide your contact details for potential clients or collaborators.
+-   **About Section**: Share information about yourself and your professional background.
+-   **Future Blog Feature**: A blog feature may be added where guests can react or comment on posts.
 
 ## Technologies Used
 
@@ -27,7 +30,7 @@ To get started with the Portfolio Management System, follow these steps:
 1. **Clone the repository**:
 
     ```sh
-    git clone https://github.com/your-username/portfolio-management-system.git
+    git clone https://github.com/kael8/portfolio-management-system.git
     cd portfolio-management-system
     ```
 
