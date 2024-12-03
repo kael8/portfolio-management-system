@@ -8,14 +8,16 @@ const info = ref({
         name: "",
         email: "",
     },
-    title: "",
-    description: "",
-    email: "",
-    phone: "",
-    address: "",
-    twitter: "",
-    linkedin: "",
-    github: "",
+    profile: {
+        title: "",
+        description: "",
+        phone: "",
+        address: "",
+        twitter: "",
+        linkedin: "",
+        github: "",
+        image_url: "",
+    },
 });
 
 const toast = useToast();
@@ -24,7 +26,9 @@ onMounted(async () => {
     try {
         const response = await apiClient.get("/profile");
         if (response.data && response.data.profile) {
-            info.value = response.data.profile;
+            info.value.user.name = response.data.profile.name;
+            info.value.user.email = response.data.profile.email;
+            info.value.profile = response.data.profile.profile;
         }
     } catch (error) {
         console.error(error);
@@ -36,8 +40,7 @@ const handleSubmit = async () => {
     try {
         console.log(info.value);
         // Send the data to the server
-        const response = await apiClient.post("/profile", info.value);
-        console.log(response.data);
+        const response = await apiClient.post("/profile", info.value.profile);
 
         // Show a success message
         toast.success("Profile information updated successfully");
@@ -79,7 +82,7 @@ const handleSubmit = async () => {
                         >Title</label
                     >
                     <input
-                        v-model="info.title"
+                        v-model="info.profile.title"
                         id="title"
                         name="title"
                         type="text"
@@ -94,7 +97,7 @@ const handleSubmit = async () => {
                         >Description</label
                     >
                     <textarea
-                        v-model="info.description"
+                        v-model="info.profile.description"
                         id="description"
                         name="description"
                         class="w-full p-3 border border-gray-700 rounded-md bg-gray-900 text-white"
@@ -123,7 +126,7 @@ const handleSubmit = async () => {
                     >Phone</label
                 >
                 <input
-                    v-model="info.phone"
+                    v-model="info.profile.phone"
                     id="phone"
                     name="phone"
                     type="tel"
@@ -137,7 +140,7 @@ const handleSubmit = async () => {
                     >Address</label
                 >
                 <input
-                    v-model="info.address"
+                    v-model="info.profile.address"
                     id="address"
                     name="address"
                     type="text"
@@ -154,7 +157,7 @@ const handleSubmit = async () => {
                         >Twitter</label
                     >
                     <input
-                        v-model="info.twitter"
+                        v-model="info.profile.twitter"
                         id="twitter"
                         name="twitter"
                         type="text"
@@ -168,7 +171,7 @@ const handleSubmit = async () => {
                         >LinkedIn</label
                     >
                     <input
-                        v-model="info.linkedin"
+                        v-model="info.profile.linkedin"
                         id="linkedin"
                         name="linkedin"
                         type="text"
@@ -182,7 +185,7 @@ const handleSubmit = async () => {
                         >GitHub</label
                     >
                     <input
-                        v-model="info.github"
+                        v-model="info.profile.github"
                         id="github"
                         name="github"
                         type="text"

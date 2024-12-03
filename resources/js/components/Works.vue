@@ -1,36 +1,20 @@
 <script setup>
-import { defineProps, ref } from "vue";
+import { onMounted, ref } from "vue";
 import FuneralHome from "@/assets/images/works/funeralhome.png";
 import Pharmacy from "@/assets/images/works/pharmacy.png";
 import Quotation from "@/assets/images/works/quotation.png";
+import apiClient from "@/services/apiClient";
 
-const props = defineProps({
-    works: Array,
+const works = ref([]);
+
+onMounted(async () => {
+    try {
+        const response = await apiClient.get("/projects");
+        works.value = response.data.projects;
+    } catch (error) {
+        console.error("Error fetching works:", error);
+    }
 });
-
-const works = ref([
-    {
-        title: "Funeral Home",
-        description: `
-      Developed a feature-rich website for a US-based funeral home to enhance lead generation and user experience. Utilized AWS, Cloudinary, Stripe, GitHub Copilot, Twilio, and SendGrid for various functionalities. Key contributions include payment integration, SMS notifications, email system, API development, and deployment on AWS EC2.
-    `,
-        image: FuneralHome,
-    },
-    {
-        title: "Pharmacy Sales Analytics",
-        description: `
-      Built using Laravel, this project provides functionalities for user authentication, analytics management, media management, inventory management, sales tracking, and user profiles. It streamlines pharmacy operations by integrating various management tools into a single platform.
-    `,
-        image: Pharmacy,
-    },
-    {
-        title: "Quotation Generator",
-        description: `
-      Developed using Laravel, this tool allows users to create quotations based on inputs, automatically calculates totals, and generates printable PDFs. It simplifies the process of managing and generating quotations for various services.
-    `,
-        image: Quotation,
-    },
-]);
 
 const showModal = ref(false);
 const selectedWork = ref(null);

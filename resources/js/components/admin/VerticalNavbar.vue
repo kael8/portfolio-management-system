@@ -41,11 +41,11 @@ const navbarClasses = computed(() => ({
                 Manage Portfolio
             </RouterLink>
             <RouterLink
-                to="/admin/posts"
+                to="/admin/blog-post"
                 class="p-2 hover:bg-gray-700 flex items-center w-full"
-                :class="{ 'bg-gray-700': isActiveLink('/admin/posts') }"
+                :class="{ 'bg-gray-700': isActiveLink('/admin/blog-post') }"
             >
-                Posts
+                Blog Posts
             </RouterLink>
             <RouterLink
                 to="/admin/comments"

@@ -13,7 +13,14 @@ class Authenticate extends \Illuminate\Auth\Middleware\Authenticate
         Log::info('Entering Authenticate middleware.');
 
         // Attempt to authenticate the user
-        $user = Auth::guard('sanctum')->user();
+        $token = $request->cookie('jwt_token');
+        Log::info('Received JWT Token in Auth Middleware: ' . $token);
+
+        if ($token) {
+            $request->headers->set('Authorization', 'Bearer ' . $token);
+        }
+
+        $user = Auth::guard('api')->user();
 
         if (!$user) {
             Log::warning('User not authenticated.');

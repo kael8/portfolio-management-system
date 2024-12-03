@@ -28,6 +28,18 @@ const isActiveLink = (routePath) => route.path === routePath;
                     <!-- Navigation Links -->
                     <div class="md:ml-auto">
                         <div class="flex space-x-2">
+                            <!-- Blog -->
+                            <RouterLink
+                                to="/blog"
+                                :class="[
+                                    isActiveLink('/blog')
+                                        ? 'bg-secondary/90'
+                                        : 'hover:bg-highlight/30',
+                                    'text-white/80 px-3 py-2 rounded-md',
+                                ]"
+                                >Blog</RouterLink
+                            >
+
                             <!-- Home Link -->
                             <RouterLink
                                 to="/"

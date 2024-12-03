@@ -3,6 +3,7 @@
 namespace App\Providers;
 
 use Illuminate\Foundation\Support\Providers\AuthServiceProvider as ServiceProvider;
+use Laravel\Passport\Passport;
 
 class AuthServiceProvider extends ServiceProvider
 {
@@ -12,9 +13,11 @@ class AuthServiceProvider extends ServiceProvider
 
     public function boot()
     {
-        $this->registerPolicies();
 
-        // Sanctum does not require additional boot logic here.
-        // Policies for model-specific permissions can still be registered as needed.
+
+        // Load Passport keys from the oauth directory
+        Passport::loadKeysFrom(storage_path('oauth'));
+
+
     }
 }

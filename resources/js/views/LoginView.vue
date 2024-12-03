@@ -16,31 +16,7 @@ const loginWithGoogle = async () => {
     try {
         const response = await AuthService.loginWithGoogle();
         toast.success("Logged in successfully");
-    } catch (error) {
-        if (error.response) {
-            toast.error(`Failed to login: ${error.response.data.message}`);
-            console.error("Error response:", error.response);
-        } else if (error.request) {
-            toast.error("No response received from the server");
-            console.error("Error request:", error.request);
-        } else {
-            toast.error("Error in setting up the request");
-            console.error("Error message:", error.message);
-        }
-    }
-};
-
-const handleSubmit = async () => {
-    try {
-        const response = await axios.post("/api/login", {
-            email: form.email,
-            password: form.password,
-        });
-
-        toast.success("Logged in successfully");
-        console.log(response.data);
-        // Redirect to another page if needed
-        // router.push('/dashboard');
+        router.push("/admin/dashboard");
     } catch (error) {
         if (error.response) {
             toast.error(`Failed to login: ${error.response.data.message}`);

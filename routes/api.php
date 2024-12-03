@@ -10,6 +10,8 @@ use Laravel\Passport\Http\Controllers\PersonalAccessTokenController;
 use App\Http\Controllers\SkillController;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\ProjectController;
+use App\Http\Controllers\AboutController;
+use App\Http\Controllers\PostController;
 
 /*
 |--------------------------------------------------------------------------
@@ -27,29 +29,37 @@ Route::post('/login', function (Request $request) {
     return 'Success';
 });
 
+Route::get('/profile', [ProfileController::class, 'getProfile']);
+Route::get('/profile-image', [ProfileController::class, 'getProfileImage']);
+Route::get('/skills', [SkillController::class, 'getSkills']);
+Route::get('/projects', [ProjectController::class, 'getProjects']);
+Route::get('/about', [AboutController::class, 'getAbout']);
+
 Route::get('/auth/google', [AuthController::class, 'redirectToGoogle']);
 Route::get('/auth/google/callback', [AuthController::class, 'handleGoogleCallback']);
+Route::get('/auth-check', [AuthController::class, 'authCheck']);
 
 // Authenticated routes (requires auth:api middleware)
-Route::middleware('auth:sanctum')->group(function () {
+Route::middleware('auth:api')->group(function () {
     Route::post('/auth/logout', [AuthController::class, 'logout']);
-    Route::get('/auth-check', [AuthController::class, 'authCheck']);
 
     // Skills routes
-    Route::get('/skills', [SkillController::class, 'getSkills']);
     Route::post('/skills', [SkillController::class, 'skills']);
 
     // Profile routes
-    Route::get('/profile', [ProfileController::class, 'getProfile']);
     Route::post('/profile', [ProfileController::class, 'profile']);
-    Route::get('/profile-image', [ProfileController::class, 'getProfileImage']);
     Route::post('/profile-image', [ProfileController::class, 'profileImage']);
 
     // Projects routes
-    Route::get('/projects', [ProjectController::class, 'getProjects']);
     Route::post('/projects', [ProjectController::class, 'create']);
     Route::post('/projects/{project_id}/update', [ProjectController::class, 'update']);
     Route::delete('/projects/{project_id}', [ProjectController::class, 'delete']);
+
+    // About routes
+    Route::post('/about', [AboutController::class, 'about']);
+
+    // Post routes
+    Route::post('/create-post', [PostController::class, 'create']);
 });
 
 // Passport routes with API prefix and appropriate middleware

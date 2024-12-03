@@ -28,7 +28,7 @@ export default {
         return {
             windowWidth: window.innerWidth,
             windowHeight: window.innerHeight,
-            wisps: Array.from({ length: 30 }, () => ({
+            wisps: Array.from({ length: 10 }, () => ({
                 x: Math.random() * window.innerWidth, // Random starting X position
                 y: Math.random() * window.innerHeight, // Random starting Y position
                 size: 10 + Math.random() * 5, // Smaller size for variation

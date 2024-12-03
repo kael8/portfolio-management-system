@@ -7,45 +7,11 @@ use Illuminate\Http\Request;
 use App\Models\User;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Str;
-use Laravel\Sanctum\PersonalAccessTokenResult;
 
 class AuthController extends Controller
 {
-    public function login(Request $request)
-    {
-        // Validate the request
-        $request->validate([
-            'email' => 'required|email',
-            'password' => 'required'
-        ]);
-
-        // Attempt to authenticate the user
-        if (!Auth::attempt($request->only('email', 'password'))) {
-            return response([
-                'message' => ['These credentials do not match our records.']
-            ], 401);
-        }
-
-        // Get the authenticated user
-        $user = Auth::user();
-
-        // Create a Sanctum token
-        $token = $user->createToken('Login Token')->plainTextToken;
-
-        // Return the token as a cookie
-        return response()->json(['message' => 'Logged in successfully', 'token' => $token], 200)
-            ->cookie(
-                'jwt_token',
-                $token,
-                60 * 24 * 30, // 30 days
-                '/',
-                null,
-                env('APP_ENV') === 'production', // Secure flag
-                true // HttpOnly
-            );
-    }
-
     public function redirectToGoogle()
     {
         return Socialite::driver('google')->stateless()->redirect();
@@ -54,24 +20,36 @@ class AuthController extends Controller
     public function handleGoogleCallback()
     {
         try {
-            $googleUser = Socialite::driver('google')->stateless()->user();
+            Log::info('Starting Google Callback', [
+                'client_id' => config('services.google.client_id'),
+                'redirect_uri' => config('services.google.redirect')
+            ]);
 
-            \Log::info('Google user retrieved:', ['user' => $googleUser]);
+            $googleUser = Socialite::driver('google')->stateless()->user();
+            Log::info('Google User Retrieved', [
+                'email' => $googleUser->email,
+                'name' => $googleUser->name,
+                'id' => $googleUser->id
+            ]);
 
             $user = User::updateOrCreate(
-                ['google_id' => $googleUser->id],
+                ['email' => $googleUser->email],
                 [
                     'name' => $googleUser->name,
-                    'email' => $googleUser->email,
+                    'password' => bcrypt(Str::random(40)),
                     'google_id' => $googleUser->id,
                 ]
             );
 
-            \Log::info('User created or retrieved:', ['user' => $user]);
-            // Log the user back in
+            Log::info('User created or retrieved:', ['user' => $user]);
+
+            // Log the user back in Passport
             Auth::login($user);
-            // Generate Sanctum token
-            $token = $user->createToken('google-login')->plainTextToken;
+
+            // Generate Passport token
+            $tokenResult = $user->createToken('google-login');
+            $token = $tokenResult->accessToken;
+            Log::info('Generated Passport Token: ' . $token);
 
             // Create a cookie with the token
             $cookie = cookie(
@@ -80,17 +58,20 @@ class AuthController extends Controller
                 60 * 24 * 30,    // Expiration (30 days)
                 '/',             // Path
                 null,            // Domain
-                env('APP_ENV') === 'production', // Secure flag
-                true             // HTTP only flag
+                false,           // Secure flag (set to false for local testing)
+                true,             // HTTP only flag
             );
 
-
-
+            Log::info('Setting JWT Token in Cookie: ' . $cookie->getValue());
 
             // Redirect to the specified URL with the cookie
-            return redirect()->to(env('APP_URL') . '/admin/dashboard')->withCookie($cookie);
+            return redirect()->to(env('APP_URL') . '/auth/redirect')->withCookie($cookie);
         } catch (\Exception $e) {
-            \Log::error('Google Callback Error', ['message' => $e->getMessage()]);
+            Log::error('Google Callback Error', [
+                'message' => $e->getMessage(),
+                'trace' => $e->getTraceAsString()
+            ]);
+
             return response()->json([
                 'message' => 'Failed to authenticate with Google.',
                 'error' => $e->getMessage(),
@@ -98,49 +79,87 @@ class AuthController extends Controller
         }
     }
 
-
-
-
     public function authCheck(Request $request)
     {
-        // Retrieve the token from the cookie
-        $token = $request->cookie('jwt_token');
-        Log::info('Received JWT Token in Auth Check: ' . $token);
+        try {
+            // Retrieve the token from the cookie
+            $token = $request->cookie('jwt_token');
+            Log::info('Received JWT Token in Auth Check: ' . $token);
 
-        if ($token) {
+            if (!$token) {
+                Log::error('No JWT Token found in the cookie.');
+                return response()->json([
+                    'authenticated' => false,
+                    'message' => 'No token found'
+                ], 401);
+            }
+
             $request->headers->set('Authorization', 'Bearer ' . $token);
-        }
 
-        $user = Auth::guard('api')->user();
-        if ($user) {
-            Log::info('User authenticated in auth check.', ['user' => $user]);
-            return response()->json(['authenticated' => true, 'user' => $user], 200);
-        } else {
-            Log::error('User not authenticated in auth check.');
-            return response()->json(['authenticated' => false], 401);
+            // Attempt to authenticate the user
+            $user = Auth::guard('api')->user();
+            Log::info('Authenticated User:', ['user' => $user]);
+
+            if (!$user) {
+                Log::error('User not authenticated in auth check.');
+                return response()->json([
+                    'authenticated' => false,
+                    'message' => 'Invalid token'
+                ], 401);
+            }
+
+            return response()->json([
+                'authenticated' => true,
+                'user' => $user->only(['id', 'name', 'email']),
+                'scopes' => $user->token()->scopes ?? []
+            ], 200);
+        } catch (\Exception $e) {
+            Log::error('Auth Check Error', [
+                'message' => $e->getMessage(),
+                'trace' => $e->getTraceAsString()
+            ]);
+
+            return response()->json([
+                'authenticated' => false,
+                'message' => 'Authentication error'
+            ], 500);
         }
     }
 
     public function logout(Request $request)
     {
         try {
-            $user = $request->user();
+            // Retrieve the token from the cookie
+            $token = $request->cookie('jwt_token');
 
-            // Check if the token is a TransientToken
-            if ($user->currentAccessToken() && !$user->currentAccessToken() instanceof \Laravel\Sanctum\TransientToken) {
-                // Revoke the current token
-                $user->currentAccessToken()->delete();
+            if ($token) {
+                $request->headers->set('Authorization', 'Bearer ' . $token);
             }
 
-            // Clear the jwt_token cookie
-            $cookie = cookie('jwt_token', '', -1);
+            // Attempt to authenticate the user
+            $user = Auth::guard('api')->user();
 
-            // Clear Auth session
-            Auth::guard('web')->logout();
+            if ($user) {
+                // Revoke the current token
+                $user->token()->revoke();
 
-            return redirect()->to(env('APP_URL') . '/auth/login')->withCookie($cookie);
+                // Clear all cookies
+                $cookies = [
+                    cookie()->forget('jwt_token'),
+                    cookie()->forget('XSRF-TOKEN'),
+                    cookie()->forget(env('APP_NAME') . '_session')
+                ];
+
+                // Clear Auth session
+                Auth::guard('web')->logout();
+
+                return redirect()->to(env('APP_URL') . '/auth/login')->withCookies($cookies);
+            } else {
+                Log::warning('User not authenticated during logout.');
+                return response()->json(['message' => 'User not authenticated'], 401);
+            }
         } catch (\Exception $e) {
-            \Log::error('Logout Error', ['message' => $e->getMessage()]);
+            Log::error('Logout Error', ['message' => $e->getMessage()]);
             return response()->json([
                 'message' => 'Failed to log out',
                 'error' => $e->getMessage(),

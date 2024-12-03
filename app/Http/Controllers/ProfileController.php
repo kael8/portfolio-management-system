@@ -6,6 +6,8 @@ use Illuminate\Http\Request;
 use App\Models\Profile;
 use App\Models\User;
 use CloudinaryLabs\CloudinaryLaravel\Facades\Cloudinary;
+use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Auth;
 
 class ProfileController extends Controller
 {
@@ -42,14 +44,23 @@ class ProfileController extends Controller
 
     public function getProfile(Request $request)
     {
-        // Get the authenticated user
-        $user = $request->user();
+        try {
+            // Get the authenticated user using Sanctum
+            $userId = User::where('isOwner', true)->first()->id;
 
-        // Get the user's profile
-        $profile = Profile::with('user')
-            ->where('user_id', $user->id)->first();
 
-        return response()->json(['profile' => $profile], 200);
+            // Retrieve the user's profile
+            $profile = User::with('profile')->find($userId);
+
+            if (!$profile) {
+                return response()->json(['message' => 'Profile not found'], 404);
+            }
+
+            return response()->json(['profile' => $profile], 200);
+        } catch (\Exception $e) {
+            Log::error('Profile retrieval error', ['message' => $e->getMessage()]);
+            return response()->json(['message' => 'Failed to retrieve profile', 'error' => $e->getMessage()], 500);
+        }
     }
 
     public function profileImage(Request $request)
@@ -60,10 +71,18 @@ class ProfileController extends Controller
         ]);
 
         // Get the authenticated user
-        $user = $request->user();
+        $user = Auth::guard('sanctum')->user();
 
-        // Get the user's profile
-        $profile = Profile::where('user_id', $user->id)->first();
+        if (!$user) {
+            Log::error('User not authenticated.');
+            return response()->json(['message' => 'User not authenticated'], 401);
+        }
+
+        // Get or create the user's profile
+        $profile = Profile::firstOrCreate(
+            ['user_id' => $user->id],
+            ['user_id' => $user->id] // Default values if creating a new profile
+        );
 
         // Upload the image to Cloudinary
         $uploadedFileUrl = Cloudinary::upload($request->file('image')->getRealPath(), [
@@ -71,7 +90,6 @@ class ProfileController extends Controller
             'folder' => 'portfolio/profile',
             'overwrite' => true,
         ])->getSecurePath();
-
 
         // Update the profile image
         $profile->image_url = $uploadedFileUrl;
@@ -83,10 +101,10 @@ class ProfileController extends Controller
     public function getProfileImage(Request $request)
     {
         // Get the authenticated user
-        $user = $request->user();
+        $userId = User::where('isOwner', true)->first()->id;
 
         // Get the user's profile
-        $profile = Profile::where('user_id', $user->id)->first();
+        $profile = Profile::where('user_id', $userId)->first();
 
         return response()->json(['image' => $profile->image_url], 200);
     }

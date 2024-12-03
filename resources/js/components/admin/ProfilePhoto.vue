@@ -5,7 +5,7 @@ import { useToast } from "vue-toastification";
 import PulseLoader from "vue-spinner/src/PulseLoader.vue";
 
 const showModal = ref(false);
-const userImage = ref(""); // Replace with the actual default image path
+const userImage = ref("https://via.placeholder.com/150"); // Replace with the actual default image path
 const previewImage = ref(null);
 const selectedFile = ref(null);
 const isLoading = ref(false);
@@ -82,7 +82,7 @@ const saveImage = async () => {
         <img
             class="w-32 h-32 rounded-full border-4 border-gray-700 shadow-lg object-cover"
             :src="userImage"
-            alt="Profile photo"
+            alt=""
         />
         <button
             @click="openModal"

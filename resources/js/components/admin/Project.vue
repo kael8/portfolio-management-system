@@ -197,20 +197,22 @@ const deleteProject = async () => {
                     alt="Project Image"
                     class="w-full h-48 object-cover rounded-md mb-4"
                 />
-                <h2 class="text-2xl font-bold mb-2">{{ project.title }}</h2>
-                <p class="text-gray-300 mb-4">{{ project.description }}</p>
-                <button
-                    @click="openModal(project)"
-                    class="mr-2 p-2 bg-blue-600 hover:bg-blue-700 rounded-md text-white"
-                >
-                    Edit
-                </button>
-                <button
-                    @click="confirmDeleteProject(project)"
-                    class="p-2 bg-red-600 hover:bg-red-700 rounded-md text-white"
-                >
-                    Delete
-                </button>
+                <p class="font-bold mb-2">{{ project.title }}</p>
+
+                <div class="flex w-full">
+                    <button
+                        @click="openModal(project)"
+                        class="w-1/2 mx-1 p-2 bg-blue-600 hover:bg-blue-700 rounded-md text-white flex items-center justify-center"
+                    >
+                        Edit
+                    </button>
+                    <button
+                        @click="confirmDeleteProject(project)"
+                        class="w-1/2 mx-1 p-2 bg-red-600 hover:bg-red-700 rounded-md text-white flex items-center justify-center"
+                    >
+                        Delete
+                    </button>
+                </div>
             </div>
         </div>
     </div>

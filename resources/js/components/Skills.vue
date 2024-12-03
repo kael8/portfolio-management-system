@@ -1,13 +1,10 @@
 <script setup>
-import { defineProps } from "vue";
-import { ref } from "vue";
+import { ref, onMounted } from "vue";
+import apiClient from "@/services/apiClient";
 
-const props = defineProps({
-    frontend: Array,
-    backend: Array,
-    tools: Array,
-});
+const skills = ref([]);
 
+/*
 const skills = ref([
     {
         title: "Frontend",
@@ -47,6 +44,29 @@ const skills = ref([
         ],
     },
 ]);
+*/
+
+onMounted(async () => {
+    try {
+        const response = await apiClient.get("/skills");
+        if (response.data && response.data.skills) {
+            const groupedSkills = response.data.skills.reduce((acc, skill) => {
+                const { type, name } = skill;
+                const group = acc.find((g) => g.title === type);
+                if (group) {
+                    group.items.push(name);
+                } else {
+                    acc.push({ title: type, items: [name] });
+                }
+                return acc;
+            }, []);
+            skills.value = groupedSkills;
+        }
+    } catch (error) {
+        console.error(error);
+        // Handle error
+    }
+});
 </script>
 
 <template>
