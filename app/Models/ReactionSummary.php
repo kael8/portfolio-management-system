@@ -9,7 +9,7 @@ class ReactionSummary extends Model
 {
     use HasFactory;
 
-    protected $table = 'reaction_summary';
+    protected $table = 'reaction_summaries';
 
     protected $fillable = [
         'post_id',

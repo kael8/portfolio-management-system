@@ -722,8 +722,15 @@ onMounted(async () => {
 });
 
 const addSkill = () => {
+    // Find the highest id in the skills array
+    const latestId =
+        state.skills.length > 0
+            ? Math.max(...state.skills.map((skill) => skill.id))
+            : 0;
+
+    // Push the new skill with an incremented id
     state.skills.push({
-        id: uuidv4(),
+        id: latestId + 1, // Increment the latest id
         name: "",
         type: "",
     });

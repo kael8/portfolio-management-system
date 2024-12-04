@@ -12,6 +12,7 @@ use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\ProjectController;
 use App\Http\Controllers\AboutController;
 use App\Http\Controllers\PostController;
+use App\Http\Controllers\ReactionController;
 
 /*
 |--------------------------------------------------------------------------
@@ -34,6 +35,7 @@ Route::get('/profile-image', [ProfileController::class, 'getProfileImage']);
 Route::get('/skills', [SkillController::class, 'getSkills']);
 Route::get('/projects', [ProjectController::class, 'getProjects']);
 Route::get('/about', [AboutController::class, 'getAbout']);
+Route::get('/get-posts', [PostController::class, 'getPosts']);
 
 Route::get('/auth/google', [AuthController::class, 'redirectToGoogle']);
 Route::get('/auth/google/callback', [AuthController::class, 'handleGoogleCallback']);
@@ -60,6 +62,9 @@ Route::middleware('auth:api')->group(function () {
 
     // Post routes
     Route::post('/create-post', [PostController::class, 'create']);
+
+    // Reaction routes
+    Route::post('/reaction', [ReactionController::class, 'store']);
 });
 
 // Passport routes with API prefix and appropriate middleware

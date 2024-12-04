@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
 use App\Models\Post;
+use App\Models\User;
 use Illuminate\Support\Facades\DB;
 use CloudinaryLabs\CloudinaryLaravel\Facades\Cloudinary;
 use Illuminate\Support\Facades\Auth;
@@ -69,7 +70,7 @@ class PostController extends Controller
         }
     }
 
-    public function getPosts()
+    public function getPosts(Request $request)
     {
         $posts = Post::with('images')
             ->with('user')
@@ -77,6 +78,21 @@ class PostController extends Controller
             ->with('reactions_summary')
             ->get();
 
-        return response()->json(['posts' => $posts], 200);
+        $profileImage = User::where('isOwner', true)
+            ->with('profile')
+            ->first()
+            ->profile
+            ->image_url;
+
+        $token = $request->cookie('jwt_token');
+
+        $request->headers->set('Authorization', 'Bearer ' . $token);
+
+        // Attempt to authenticate the user
+        $user = Auth::guard('api')->user();
+
+        $userId = $user ? $user->id : null;
+
+        return response()->json(['posts' => $posts, 'profileImage' => $profileImage, 'userId' => $userId], 200);
     }
 }

@@ -34,7 +34,7 @@ class Post extends Model
 
     public function reactions_summary()
     {
-        return $this->has(ReactionSummary::class);
+        return $this->hasOne(ReactionSummary::class);
     }
 
     public function images()

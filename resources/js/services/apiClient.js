@@ -6,10 +6,10 @@ const apiClient = axios.create({
     withCredentials: true, // Ensure cookies are sent with requests
 });
 
-// Add a request interceptor to include the JWT token in the Authorization header
+// Add a request interceptor to check token expiration
 apiClient.interceptors.request.use(
-    (config) => {
-        const token = Cookies.get("jwt_token"); // Retrieve the token from the cookie
+    async (config) => {
+        const token = Cookies.get("jwt_token");
         if (token) {
             config.headers["Authorization"] = `Bearer ${token}`;
         }

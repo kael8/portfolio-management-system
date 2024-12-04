@@ -18,6 +18,8 @@ class AuthServiceProvider extends ServiceProvider
         // Load Passport keys from the oauth directory
         Passport::loadKeysFrom(storage_path('oauth'));
 
-
+        Passport::tokensExpireIn(now()->addDays(15));
+        Passport::refreshTokensExpireIn(now()->addDays(30));
+        Passport::personalAccessTokensExpireIn(now()->addMonths(6));
     }
 }
