@@ -65,7 +65,7 @@ const saveImage = async () => {
             }
         } catch (error) {
             console.error("Failed to upload image:", error);
-            toast.error("Failed to upload image");
+            toast.error(error.response.data.message || "Failed to create post");
         } finally {
             isLoading.value = false;
         }

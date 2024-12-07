@@ -17,4 +17,10 @@ class ReactionSummary extends Model
         'cool_count',
         'bad_count',
     ];
+
+    // Define the relationship to get the user's reaction
+    public function user_reaction($userId)
+    {
+        return $this->hasOne(Reaction::class, 'post_id', 'post_id')->where('user_id', $userId);
+    }
 }

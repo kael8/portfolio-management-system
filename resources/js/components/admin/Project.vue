@@ -44,11 +44,9 @@ const openModal = (project = null) => {
         project.description &&
         project.image
     ) {
-        console.log("Editing project:", project);
         isEditing.value = true;
         currentProject.value = { ...project };
     } else {
-        console.log("Adding new project");
         isEditing.value = false;
         currentProject.value = {
             id: null,
@@ -131,9 +129,7 @@ const saveProject = async () => {
             `Failed to ${isEditing.value ? "update" : "create"} project:`,
             error
         );
-        toast.error(
-            `Failed to ${isEditing.value ? "update" : "create"} project`
-        );
+        toast.error(error.response.data.message || "Failed to create post");
     } finally {
         isLoading.value = false;
         fetchProjects();
@@ -163,7 +159,7 @@ const deleteProject = async () => {
         }
     } catch (error) {
         console.error("Failed to delete project:", error);
-        toast.error("Failed to delete project");
+        toast.error(error.response.data.message || "Failed to create post");
     } finally {
         showDeleteModal.value = false;
         projectToDelete.value = null;

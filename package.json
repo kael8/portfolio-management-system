@@ -19,11 +19,15 @@
         "vue": "^3.5.13"
     },
     "dependencies": {
+        "@fortawesome/fontawesome-free": "^6.7.1",
         "@heroicons/vue": "^2.2.0",
         "@webzlodimir/vue-reactions": "^0.0.3",
         "animejs": "^3.2.2",
+        "date-fns": "^4.1.0",
+        "date-fns-tz": "^3.2.0",
+        "flowbite": "^2.5.2",
         "js-cookie": "^3.0.5",
-        "swiper": "^10.0.0",
+        "swiper": "^11.1.15",
         "tailwind-scrollbar": "^3.1.0",
         "uuid": "^11.0.3",
         "vue-router": "^4.0.13",

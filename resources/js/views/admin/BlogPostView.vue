@@ -5,10 +5,13 @@ import { ref, onMounted } from "vue";
 import apiClient from "@/services/apiClient";
 import { CameraIcon } from "@heroicons/vue/24/outline";
 import { useToast } from "vue-toastification";
+import PulseLoader from "vue-spinner/src/PulseLoader.vue";
 
 const showModal = ref(false);
 const userImage = ref("https://via.placeholder.com/150"); // Replace with the actual default image path
 const toast = useToast();
+const isLoading = ref(false);
+const postComponent = ref(null);
 
 onMounted(async () => {
     try {
@@ -26,6 +29,7 @@ const postForm = ref({
 });
 
 const createPost = async () => {
+    isLoading.value = true;
     const formData = new FormData();
     formData.append("title", postForm.value.title);
     formData.append("content", postForm.value.content);
@@ -36,6 +40,19 @@ const createPost = async () => {
         }
     });
 
+    if (
+        !postForm.value.title &&
+        !postForm.value.content &&
+        !formData.get("images[]")
+    ) {
+        // Check if atleast either title, content, or images are provided
+        toast.error(
+            "Please provide a title, content, and image(s) to create a post"
+        );
+        isLoading.value = false;
+        return;
+    }
+
     try {
         const response = await apiClient.post("/create-post", formData, {
             headers: { "Content-Type": "multipart/form-data" },
@@ -45,12 +62,15 @@ const createPost = async () => {
             toast.success("Post created successfully");
             showModal.value = false;
             postForm.value = { title: "", content: "", images: [] }; // Reset the form
+            postComponent.value.fetchPost();
         } else {
             toast.error("Failed to create post");
         }
     } catch (error) {
         console.error("Error creating post:", error);
-        toast.error("Error creating post");
+        toast.error(error.response.data.message || "Failed to create post");
+    } finally {
+        isLoading.value = false;
     }
 };
 
@@ -98,8 +118,8 @@ const removeImageInput = (index) => {
             </div>
 
             <!-- Post List -->
-            <div class="w-full max-w-2xl p-4">
-                <Post />
+            <div class="w-full max-w-2xl md:p-4 sm:pt-4">
+                <Post ref="postComponent" />
             </div>
 
             <!-- Modal -->
@@ -137,7 +157,6 @@ const removeImageInput = (index) => {
                                     type="text"
                                     placeholder="Enter post title"
                                     class="w-full px-4 py-2 bg-gray-900 border focus:outline-none focus:ring-2 focus:ring-blue-500 border-gray-700 rounded-md"
-                                    required
                                 />
                             </div>
 
@@ -148,7 +167,6 @@ const removeImageInput = (index) => {
                                     placeholder="What's on your mind?"
                                     class="w-full px-4 py-2 bg-gray-900 border focus:outline-none focus:ring-2 focus:ring-blue-500 border-gray-700 rounded-md resize-none"
                                     rows="4"
-                                    required
                                 ></textarea>
                             </div>
 
@@ -227,8 +245,16 @@ const removeImageInput = (index) => {
                                 <button
                                     type="submit"
                                     class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded"
+                                    :disabled="isLoading"
                                 >
-                                    Publish
+                                    <span v-if="isLoading">
+                                        <PulseLoader
+                                            :loading="true"
+                                            color="#ffffff"
+                                            size="10px"
+                                        />
+                                    </span>
+                                    <span v-else> Publish </span>
                                 </button>
                             </div>
                         </form>

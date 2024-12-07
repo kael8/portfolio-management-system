@@ -32,6 +32,8 @@ class Post extends Model
         return $this->hasMany(Reaction::class);
     }
 
+
+
     public function reactions_summary()
     {
         return $this->hasOne(ReactionSummary::class);

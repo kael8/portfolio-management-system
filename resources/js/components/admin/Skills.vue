@@ -748,10 +748,10 @@ const submitSkills = async () => {
         alert("Please add at least one valid skill.");
         return;
     }
-    console.log("Submitted skills:", validSkills);
+
     try {
         const response = await apiClient.post("/skills", validSkills);
-        console.log(response.data);
+
         toast.success("Skills submitted successfully");
         const fetchSkills = async () => {
             try {
@@ -771,7 +771,7 @@ const submitSkills = async () => {
         fetchSkills();
     } catch (error) {
         console.error("Error submitting skills:", error);
-        toast.error("Failed to submit skills");
+        toast.error(error.response.data.message || "Failed to create post");
     }
 };
 

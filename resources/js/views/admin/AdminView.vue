@@ -43,7 +43,7 @@ onUnmounted(() => {
                 }"
             />
         </button>
-        <div class="flex">
+        <div>
             <VerticalNavbar :isNavbarVisible="isNavbarVisible" />
             <div
                 :class="{

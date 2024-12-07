@@ -4,6 +4,7 @@ module.exports = {
         "./resources/js/**/*.vue", // Add your Vue files
         "./resources/sass/**/*.scss", // If using SCSS
         "./resources/css/**/*.css", // If using plain CSS
+        "./node_modules/flowbite/**/*.js", // Add all Flowbite JS files
     ],
     theme: {
         extend: {
@@ -15,5 +16,5 @@ module.exports = {
             },
         },
     },
-    plugins: [],
+    plugins: [require("flowbite/plugin")],
 };

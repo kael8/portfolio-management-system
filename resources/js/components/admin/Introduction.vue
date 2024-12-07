@@ -38,7 +38,6 @@ onMounted(async () => {
 
 const handleSubmit = async () => {
     try {
-        console.log(info.value);
         // Send the data to the server
         const response = await apiClient.post("/profile", info.value.profile);
 
@@ -46,7 +45,7 @@ const handleSubmit = async () => {
         toast.success("Profile information updated successfully");
     } catch (error) {
         console.error(error);
-        toast.error("Failed to update profile information");
+        toast.error(error.response.data.message || "Failed to create post");
     }
 };
 </script>

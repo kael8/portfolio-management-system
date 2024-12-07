@@ -11,14 +11,14 @@ import About from "@/components/admin/About.vue";
     <AdminView>
         <div class="h-full">
             <main
-                class="block w-full md:inline-block md:align-top md:w-[60%] p-4"
+                class="block w-full md:inline-block md:align-top md:w-[60%] sm:pt-4 md:p-4"
             >
                 <!-- Main content goes here -->
                 <Introduction />
                 <Project />
             </main>
             <aside
-                class="block w-full md:inline-block md:align-top md:w-[40%] p-4"
+                class="block w-full md:inline-block md:align-top md:w-[40%] sm:pt-4 md:p-4"
             >
                 <Skills />
                 <ProfilePhoto />

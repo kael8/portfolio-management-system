@@ -28,7 +28,7 @@ class ProfileController extends Controller
             ]);
 
             // Get the authenticated user
-            $user = $request->user();
+            $user = Auth::guard('api')->user();
 
             // Create or update the user's profile
             $profile = Profile::updateOrCreate(
@@ -55,6 +55,12 @@ class ProfileController extends Controller
             if (!$profile) {
                 return response()->json(['message' => 'Profile not found'], 404);
             }
+
+            // Filter out isOwner, google_id, and email_verified_at, created_at, and updated_at fields
+            $profile = $profile->makeHidden(['id', 'isOwner', 'google_id', 'email_verified_at', 'created_at', 'updated_at']);
+
+            // Filter out profile.profile id, user_id, created_at, and updated_at fields
+            $profile->profile = $profile->profile->makeHidden(['id', 'user_id', 'created_at', 'updated_at']);
 
             return response()->json(['profile' => $profile], 200);
         } catch (\Exception $e) {
@@ -107,5 +113,31 @@ class ProfileController extends Controller
         $profile = Profile::where('user_id', $userId)->first();
 
         return response()->json(['image' => $profile->image_url], 200);
+    }
+
+    // Update the user's account
+    public function updateAccount(Request $request)
+    {
+        try {
+            // Validate the request
+            $validated = $request->validate([
+                'name' => 'nullable|string',
+                'isPrivate' => 'nullable|boolean',
+
+            ]);
+
+            // Get the authenticated user
+            $user = Auth::guard('sanctum')->user();
+
+            // Update the user's account
+            $user->name = $validated['name'];
+            $user->email = $validated['email'];
+            $user->save();
+
+            return response()->json(['message' => 'Account updated successfully', 'user' => $user], 200);
+        } catch (\Exception $e) {
+            Log::error('Account update error', ['message' => $e->getMessage()]);
+            return response()->json(['message' => 'Failed to update account', 'error' => $e->getMessage()], 500);
+        }
     }
 }

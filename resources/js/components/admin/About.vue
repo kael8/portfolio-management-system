@@ -35,11 +35,10 @@ const isLoading = ref(false);
 const saveInfo = async () => {
     // Logic to save the information
     isLoading.value = true;
-    console.log("Information saved:", info.value);
+
     try {
         const response = await apiClient.post("/about", info.value);
         if (response.status === 201) {
-            console.log("Information saved:", info.value);
             toast.success("Information saved successfully");
         } else {
             toast.error("Failed to save information");
@@ -47,7 +46,7 @@ const saveInfo = async () => {
         }
     } catch (error) {
         console.error(error);
-        toast.error("Failed to save information");
+        toast.error(error.response.data.message || "Failed to create post");
     } finally {
         isLoading.value = false;
     }

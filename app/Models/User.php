@@ -22,6 +22,7 @@ class User extends Authenticatable
         'email',
         'google_id',
         'isOwner', // Add isOwner to fillable properties
+        'isPrivate', // Add isPrivate to fillable properties
         'password',
     ];
 

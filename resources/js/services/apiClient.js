@@ -9,7 +9,7 @@ const apiClient = axios.create({
 // Add a request interceptor to check token expiration
 apiClient.interceptors.request.use(
     async (config) => {
-        const token = Cookies.get("jwt_token");
+        const token = Cookies.get("auth_token"); // Update to use the correct cookie name
         if (token) {
             config.headers["Authorization"] = `Bearer ${token}`;
         }

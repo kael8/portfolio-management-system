@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
 use App\Models\About;
+use Illuminate\Support\Facades\Auth;
 
 class AboutController extends Controller
 {
@@ -19,13 +20,16 @@ class AboutController extends Controller
             ]);
 
             // Get the authenticated user
-            $user = $request->user();
+            $user = Auth::guard('api')->user();
 
             // Create or update the user's about
             $about = About::updateOrCreate(
                 ['user_id' => $user->id],
                 $validated
             );
+
+            // Hide id, user_id, created_at, and updated_at fields
+            $about = $about->makeHidden(['id', 'user_id', 'created_at', 'updated_at']);
 
             return response()->json(['message' => 'About created or updated successfully', 'about' => $about], 201);
         } catch (\Exception $e) {
@@ -39,6 +43,9 @@ class AboutController extends Controller
 
             // Get the user's about
             $about = About::first();
+
+            // Hide id, user_id, created_at, and updated_at fields
+            $about = $about->makeHidden(['id', 'user_id', 'created_at', 'updated_at']);
 
             return response()->json(['message' => 'About retrieved successfully', 'about' => $about], 200);
         } catch (\Exception $e) {

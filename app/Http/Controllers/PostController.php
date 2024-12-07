@@ -5,10 +5,12 @@ namespace App\Http\Controllers;
 use Illuminate\Http\Request;
 use App\Models\Post;
 use App\Models\User;
+use App\Models\Reaction;
 use Illuminate\Support\Facades\DB;
 use CloudinaryLabs\CloudinaryLaravel\Facades\Cloudinary;
 use Illuminate\Support\Facades\Auth;
 use App\Models\PostImage;
+use App\Rules\AtLeastOneField;
 
 class PostController extends Controller
 {
@@ -16,9 +18,10 @@ class PostController extends Controller
     {
         // Validate the request
         $validatedData = $request->validate([
-            'title' => 'required|string|max:255',
-            'content' => 'required|string',
+            'title' => 'nullable|string|max:255',
+            'content' => 'nullable|string',
             'images.*' => 'nullable|image|mimes:jpeg,png,jpg,gif,svg|max:2048',
+            'at_least_one' => [new AtLeastOneField(['title', 'content', 'images'])],
         ]);
 
         $user = Auth::guard('api')->user();
@@ -30,8 +33,8 @@ class PostController extends Controller
             // Create the post
             $post = Post::create([
                 'user_id' => $user->id,
-                'title' => $validatedData['title'],
-                'content' => $validatedData['content'],
+                'title' => $validatedData['title'] ?? '',
+                'content' => $validatedData['content'] ?? '',
             ]);
 
             // Handle images
@@ -72,11 +75,28 @@ class PostController extends Controller
 
     public function getPosts(Request $request)
     {
-        $posts = Post::with('images')
-            ->with('user')
-            ->with('comments')
-            ->with('reactions_summary')
-            ->get();
+
+
+        // Attempt to authenticate the user
+        $user = Auth::guard('api')->user();
+
+        $userId = $user ? $user->id : null;
+        $isPrivate = $user ? $user->isPrivate : null;
+        $posts = Post::with([
+            'images',
+            'user.profile', // Ensure this is correct
+            'comments.user.profile',
+            'reactions_summary'
+        ])->orderBy('created_at', 'desc')->get();
+
+        // Attach user_reaction to each post
+        if ($userId) {
+            $posts->each(function ($post) use ($userId) {
+                $post->user_reaction = Reaction::where('post_id', $post->id)
+                    ->where('user_id', $userId)
+                    ->first();
+            });
+        }
 
         $profileImage = User::where('isOwner', true)
             ->with('profile')
@@ -84,15 +104,34 @@ class PostController extends Controller
             ->profile
             ->image_url;
 
-        $token = $request->cookie('jwt_token');
+        // Filter out posts.user isOwner, google_id, email_verified_at, created_at, and updated_at fields
+        $posts->transform(function ($post) {
+            $post->user = $post->user->makeHidden(['isOwner', 'google_id', 'email', 'email_verified_at', 'created_at', 'updated_at']);
+            return $post;
+        });
 
-        $request->headers->set('Authorization', 'Bearer ' . $token);
+        // Filter out posts.comments.user isOwner, google_id, email_verified_at, created_at, and updated_at fields
+        $posts->transform(function ($post) {
+            $post->comments->transform(function ($comment) {
+                $comment->user = $comment->user->makeHidden(['isOwner', 'google_id', 'email', 'email_verified_at', 'created_at', 'updated_at']);
+                return $comment;
+            });
+            return $post;
+        });
 
-        // Attempt to authenticate the user
-        $user = Auth::guard('api')->user();
+        // Change posts.comments.user name to anonymous if the user is not is inPrivate
+        $posts->transform(function ($post) {
+            $post->comments->transform(function ($comment) {
+                if ($comment->user->isPrivate) {
+                    $comment->user->name = 'Anonymous';
+                    $comment->user->profile->image_url = null;
+                }
+                return $comment;
+            });
+            return $post;
+        });
 
-        $userId = $user ? $user->id : null;
 
-        return response()->json(['posts' => $posts, 'profileImage' => $profileImage, 'userId' => $userId], 200);
+        return response()->json(['posts' => $posts, 'profileImage' => $profileImage, 'userId' => $userId, 'isPrivate' => $isPrivate], 200);
     }
 }

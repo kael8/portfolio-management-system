@@ -18,8 +18,6 @@ class ReactionController extends Controller
             'reaction_id' => 'required|integer',
         ]);
 
-        $token = $request->cookie('jwt_token');
-        $request->headers->set('Authorization', 'Bearer ' . $token);
 
         // Attempt to authenticate the user
         $user = Auth::guard('api')->user();
@@ -58,8 +56,11 @@ class ReactionController extends Controller
             DB::commit();
 
             $reaction_summary = ReactionSummary::where('post_id', $reaction->post_id)->first();
+            $user_reaction = Reaction::where('post_id', $reaction->post_id)
+                ->where('user_id', $user->id)
+                ->first();
 
-            return response()->json(['reaction_summary' => $reaction_summary], 200);
+            return response()->json(['reaction_summary' => $reaction_summary, 'user_reaction' => $user_reaction], 200);
         } catch (\Exception $e) {
             DB::rollBack();
             return response()->json(['message' => 'Failed to update reaction', 'error' => $e->getMessage()], 500);

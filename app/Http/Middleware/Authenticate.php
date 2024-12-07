@@ -13,11 +13,14 @@ class Authenticate extends \Illuminate\Auth\Middleware\Authenticate
         Log::info('Entering Authenticate middleware.');
 
         // Attempt to authenticate the user
-        $token = $request->cookie('jwt_token');
-        Log::info('Received JWT Token in Auth Middleware: ' . $token);
-
-        if ($token) {
+        $authorizationHeader = $request->header('Authorization');
+        if ($authorizationHeader && preg_match('/Bearer\s(\S+)/', $authorizationHeader, $matches)) {
+            $token = $matches[1];
+            Log::info('Received JWT Token in Auth Middleware: ' . $token);
             $request->headers->set('Authorization', 'Bearer ' . $token);
+        } else {
+            Log::warning('No JWT Token found in the Authorization header.');
+            return response()->json(['message' => 'Unauthorized'], 401);
         }
 
         $user = Auth::guard('api')->user();

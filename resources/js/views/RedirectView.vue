@@ -1,21 +1,41 @@
 <script setup>
 import PulseLoader from "vue-spinner/src/PulseLoader.vue";
 import { onMounted } from "vue";
-import apiClient from "@/services/apiClient";
+import Cookies from "js-cookie";
+import axios from "axios";
+import router from "@/router";
+import { useToast } from "vue-toastification";
 
-onMounted(async () => {
-    try {
-        const response = await apiClient.get("/auth-check", {
-            withCredentials: true,
-        });
-        if (response.data && response.data.authenticated) {
-            window.location.href = "/admin/dashboard";
+const toast = useToast();
+
+const handleGoogleCallback = () => {
+    const urlParams = new URLSearchParams(window.location.search);
+    const token = urlParams.get("token");
+    const isOwner = urlParams.get("isOwner");
+
+    if (token) {
+        // Store the token as a cookie
+        Cookies.set("auth_token", token, { expires: 30, secure: true });
+
+        // Set the token in the axios default headers
+        axios.defaults.headers.common["Authorization"] = `Bearer ${token}`;
+
+        toast.success("Logged in successfully");
+        if (isOwner === "1") {
+            router.push("/admin/dashboard");
         } else {
-            window.location.href = "/auth/login";
+            router.push("/blog");
         }
-    } catch (error) {
-        console.error(error);
-        window.location.href = "/auth/login";
+    } else {
+        toast.error("Failed to handle Google callback");
+        console.error("No token found in the URL");
+    }
+};
+
+onMounted(() => {
+    const urlParams = new URLSearchParams(window.location.search);
+    if (urlParams.has("token")) {
+        handleGoogleCallback();
     }
 });
 </script>

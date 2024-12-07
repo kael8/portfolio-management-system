@@ -13,6 +13,8 @@ use App\Http\Controllers\ProjectController;
 use App\Http\Controllers\AboutController;
 use App\Http\Controllers\PostController;
 use App\Http\Controllers\ReactionController;
+use App\Http\Controllers\CommentController;
+use App\Http\Controllers\AccountController;
 
 /*
 |--------------------------------------------------------------------------
@@ -39,12 +41,29 @@ Route::get('/get-posts', [PostController::class, 'getPosts']);
 
 Route::get('/auth/google', [AuthController::class, 'redirectToGoogle']);
 Route::get('/auth/google/callback', [AuthController::class, 'handleGoogleCallback']);
-Route::get('/auth-check', [AuthController::class, 'authCheck']);
+
+Route::post('/auth/signup', [AuthController::class, 'signup']);
+Route::post('/auth/signin', [AuthController::class, 'signin']);
+
 
 // Authenticated routes (requires auth:api middleware)
 Route::middleware('auth:api')->group(function () {
     Route::post('/auth/logout', [AuthController::class, 'logout']);
 
+    Route::get('/auth-check', [AuthController::class, 'authCheck']);
+
+    Route::post('/update-account', [AccountController::class, 'updateAccount']);
+
+    Route::get('/get-account', [AccountController::class, 'getAccount']);
+
+    // Reaction routes
+    Route::post('/reaction', [ReactionController::class, 'store']);
+
+    // Comment routes
+    Route::post('/create-comment', [CommentController::class, 'create']);
+});
+
+Route::middleware(['auth:api', 'check.user.type'])->group(function () {
     // Skills routes
     Route::post('/skills', [SkillController::class, 'skills']);
 
@@ -62,9 +81,6 @@ Route::middleware('auth:api')->group(function () {
 
     // Post routes
     Route::post('/create-post', [PostController::class, 'create']);
-
-    // Reaction routes
-    Route::post('/reaction', [ReactionController::class, 'store']);
 });
 
 // Passport routes with API prefix and appropriate middleware

@@ -1,9 +1,12 @@
 <script setup>
 import { RouterLink, useRoute } from "vue-router";
 import { computed } from "vue";
+import { authState } from "@/services/auth";
 
 const route = useRoute();
 const isActiveLink = (routePath) => route.path === routePath;
+
+const isOwner = computed(() => authState.isOwner);
 
 const props = defineProps({
     isNavbarVisible: Boolean,
@@ -47,13 +50,6 @@ const navbarClasses = computed(() => ({
             >
                 Blog Posts
             </RouterLink>
-            <RouterLink
-                to="/admin/comments"
-                class="p-2 hover:bg-gray-700 flex items-center w-full"
-                :class="{ 'bg-gray-700': isActiveLink('/admin/comments') }"
-            >
-                Comments
-            </RouterLink>
         </div>
         <div
             class="flex flex-col items-center justify-center border-b border-gray-700"
@@ -74,12 +70,10 @@ const navbarClasses = computed(() => ({
             </RouterLink>
         </div>
         <div class="flex items-center justify-center h-16">
-            <RouterLink
-                to="/admin/logout"
-                class="p-2 hover:bg-gray-700 flex items-center w-full"
-            >
-                Logout
-            </RouterLink>
+            <!-- Viewing as Guest Sign -->
+            <span v-if="!isOwner" class="text-sm text-gray-300">
+                Viewing as Guest
+            </span>
         </div>
     </div>
 </template>

@@ -3,6 +3,7 @@ import { RouterLink, useRoute } from "vue-router";
 import { useToast } from "vue-toastification";
 import apiClient from "@/services/apiClient";
 import router from "@/router";
+import { setAuthState, setIsOwner } from "@/services/auth";
 
 const route = useRoute();
 const toast = useToast();
@@ -13,6 +14,8 @@ const handleLogout = async () => {
     try {
         await apiClient.post("/auth/logout");
         toast.success("Logged out successfully");
+        setAuthState(false);
+        setIsOwner(false);
         router.push("/auth/login");
     } catch (error) {
         console.error(error);
@@ -26,7 +29,7 @@ const handleLogout = async () => {
         <div class="mx-auto max-w-7xl px-2 sm:px-6 lg:px-8">
             <div class="flex h-[63px] items-center justify-between">
                 <div
-                    class="flex flex-1 items-center justify-center md:items-stretch md:justify-start"
+                    class="flex flex-1 items-center h-16 justify-center md:items-stretch md:justify-start"
                 ></div>
 
                 <!-- Navigation Links -->

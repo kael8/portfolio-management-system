@@ -12,9 +12,92 @@ use Illuminate\Support\Str;
 
 class AuthController extends Controller
 {
+    public function signup(Request $request)
+    {
+        try {
+            $validatedData = $request->validate([
+                'email' => 'required|email|unique:users,email',
+                'password' => 'required|min:6',
+            ]);
+
+            // Reagister the user with auto-generated guest name
+            $user = User::create([
+                'name' => 'Guest#' . Str::random(5),
+                'email' => $validatedData['email'],
+                'password' => bcrypt($validatedData['password']),
+                'isOwner' => 0,
+            ]);
+
+            // Log the user back in Passport
+            Auth::login($user);
+
+            // Generate Passport token
+            $tokenResult = $user->createToken('authToken');
+            $token = $tokenResult->accessToken;
+
+
+            return response()->json([
+                'message' => 'User registered successfully',
+                'token' => $token,
+                'isOwner' => $user->isOwner,
+            ], 201);
+        } catch (\Exception $e) {
+            Log::error('Registration Error', [
+                'message' => $e->getMessage(),
+                'trace' => $e->getTraceAsString()
+            ]);
+
+            return response()->json([
+                'message' => 'Failed to register user',
+                'error' => $e->getMessage(),
+            ], 500);
+        }
+    }
+
+    public function signin(Request $request)
+    {
+        try {
+            $validatedData = $request->validate([
+                'email' => 'required|email',
+                'password' => 'required',
+            ]);
+
+            // Attempt to authenticate the user
+            if (!Auth::attempt($validatedData)) {
+                return response()->json(['message' => 'Invalid credentials'], 401);
+            }
+
+            // Get the authenticated user
+            $user = Auth::user();
+
+            // Generate Passport token
+            $tokenResult = $user->createToken('authToken');
+            $token = $tokenResult->accessToken;
+
+            return response()->json([
+                'message' => 'User logged in successfully',
+                'token' => $token,
+                'isOwner' => $user->isOwner,
+            ]);
+        } catch (\Exception $e) {
+            Log::error('Login Error', [
+                'message' => $e->getMessage(),
+                'trace' => $e->getTraceAsString()
+            ]);
+
+            return response()->json([
+                'message' => 'Failed to log in',
+                'error' => $e->getMessage(),
+            ], 500);
+        }
+    }
+
     public function redirectToGoogle()
     {
-        return Socialite::driver('google')->stateless()->redirect();
+        return Socialite::driver('google')
+            ->stateless()
+            ->with(['prompt' => 'select_account'])
+            ->redirect();
     }
 
     public function handleGoogleCallback()
@@ -51,21 +134,8 @@ class AuthController extends Controller
             $token = $tokenResult->accessToken;
             Log::info('Generated Passport Token: ' . $token);
 
-            // Create a cookie with the token
-            $cookie = cookie(
-                'jwt_token',     // Cookie name
-                $token,          // Token value
-                60 * 24 * 30,    // Expiration (30 days)
-                '/',             // Path
-                null,            // Domain
-                false,           // Secure flag (set to false for local testing)
-                true,             // HTTP only flag
-            );
-
-            Log::info('Setting JWT Token in Cookie: ' . $cookie->getValue());
-
-            // Redirect to the specified URL with the cookie
-            return redirect()->to(env('APP_URL') . '/auth/redirect')->withCookie($cookie);
+            // Redirect to the Vue route with the token as a query parameter
+            return redirect()->to(env('APP_URL') . '/auth/redirect?token=' . $token . '&isOwner=' . $user->isOwner);
         } catch (\Exception $e) {
             Log::error('Google Callback Error', [
                 'message' => $e->getMessage(),
@@ -82,37 +152,32 @@ class AuthController extends Controller
     public function authCheck(Request $request)
     {
         try {
-            // Retrieve the token from the cookie
-            $token = $request->cookie('jwt_token');
-            Log::info('Received JWT Token in Auth Check: ' . $token);
-
-            if (!$token) {
-                Log::error('No JWT Token found in the cookie.');
+            // Optionally, you can validate the token here
+            try {
+                $user = Auth::guard('api')->user();
+                if (!$user) {
+                    Log::error('Invalid token.');
+                    return response()->json([
+                        'authenticated' => false,
+                        'message' => 'Invalid token',
+                    ], 401);
+                }
+            } catch (\Exception $e) {
+                Log::error('Token validation error: ' . $e->getMessage());
                 return response()->json([
                     'authenticated' => false,
-                    'message' => 'No token found'
+                    'message' => 'Token validation error',
+                    'error' => $e->getMessage(),
                 ], 401);
             }
 
-            $request->headers->set('Authorization', 'Bearer ' . $token);
-
-            // Attempt to authenticate the user
-            $user = Auth::guard('api')->user();
-            Log::info('Authenticated User:', ['user' => $user]);
-
-            if (!$user) {
-                Log::error('User not authenticated in auth check.');
-                return response()->json([
-                    'authenticated' => false,
-                    'message' => 'Invalid token'
-                ], 401);
-            }
+            $isOwner = $user->isOwner;
 
             return response()->json([
                 'authenticated' => true,
-                'user' => $user->only(['id', 'name', 'email']),
-                'scopes' => $user->token()->scopes ?? []
-            ], 200);
+                'isOwner' => $isOwner,
+                'message' => 'Token found',
+            ]);
         } catch (\Exception $e) {
             Log::error('Auth Check Error', [
                 'message' => $e->getMessage(),
@@ -121,7 +186,8 @@ class AuthController extends Controller
 
             return response()->json([
                 'authenticated' => false,
-                'message' => 'Authentication error'
+                'message' => 'Failed to check authentication.',
+                'error' => $e->getMessage(),
             ], 500);
         }
     }
@@ -129,23 +195,19 @@ class AuthController extends Controller
     public function logout(Request $request)
     {
         try {
-            // Retrieve the token from the cookie
-            $token = $request->cookie('jwt_token');
-
-            if ($token) {
-                $request->headers->set('Authorization', 'Bearer ' . $token);
-            }
-
             // Attempt to authenticate the user
             $user = Auth::guard('api')->user();
 
             if ($user) {
                 // Revoke the current token
-                $user->token()->revoke();
+                $token = $user->token();
+                if ($token) {
+                    $token->revoke();
+                }
 
                 // Clear all cookies
                 $cookies = [
-                    cookie()->forget('jwt_token'),
+                    cookie()->forget('auth_token'),
                     cookie()->forget('XSRF-TOKEN'),
                     cookie()->forget(env('APP_NAME') . '_session')
                 ];

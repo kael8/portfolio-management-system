@@ -9,16 +9,17 @@ import router from "@/router";
 const form = reactive({
     email: "",
     password: "",
+    confirmPassword: "",
 });
 
 const toast = useToast();
 
-const loginWithGoogle = async () => {
+const signupWithGoogle = async () => {
     try {
         window.location.href = "/api/auth/google";
     } catch (error) {
         if (error.response) {
-            toast.error(`Failed to login: ${error.response.data.message}`);
+            toast.error(`Failed to sign up: ${error.response.data.message}`);
             console.error("Error response:", error.response);
         } else if (error.request) {
             toast.error("No response received from the server");
@@ -30,9 +31,19 @@ const loginWithGoogle = async () => {
     }
 };
 
-const loginWithForm = async () => {
+const signupWithForm = async () => {
+    if (form.password.length < 6) {
+        toast.error("Password must be more than 6 characters");
+        return;
+    }
+
+    if (form.password !== form.confirmPassword) {
+        toast.error("Passwords do not match");
+        return;
+    }
+
     try {
-        const response = await axios.post("/api/auth/signin", {
+        const response = await axios.post("/api/auth/signup", {
             email: form.email,
             password: form.password,
         });
@@ -45,10 +56,11 @@ const loginWithForm = async () => {
         // Set the token in the axios default headers
         axios.defaults.headers.common["Authorization"] = `Bearer ${token}`;
 
+        toast.success("Signed up successfully");
         router.push("/auth/redirect?token=" + token + "&isOwner=" + isOwner);
     } catch (error) {
         if (error.response) {
-            toast.error(`Failed to login: ${error.response.data.message}`);
+            toast.error(`Failed to sign up: ${error.response.data.message}`);
             console.error("Error response:", error.response);
         } else if (error.request) {
             toast.error("No response received from the server");
@@ -64,13 +76,13 @@ const loginWithForm = async () => {
 <template>
     <Navbar />
     <div class="pt-10 flex-1 text-center">
-        <!-- Login Form -->
+        <!-- Signup Form -->
         <div class="flex justify-center mb-10">
             <div
                 class="bg-gray-800 rounded-lg shadow-2xl p-8 transform transition duration-300 w-full md:w-2/3 lg:w-1/2"
             >
-                <h3 class="text-3xl font-bold text-white mb-6">Login</h3>
-                <form @submit.prevent="loginWithForm" class="space-y-6">
+                <h3 class="text-3xl font-bold text-white mb-6">Sign Up</h3>
+                <form @submit.prevent="signupWithForm" class="space-y-6">
                     <input
                         v-model="form.email"
                         type="email"
@@ -85,11 +97,18 @@ const loginWithForm = async () => {
                         class="w-full p-2 rounded bg-gray-700 text-white"
                         required
                     />
+                    <input
+                        v-model="form.confirmPassword"
+                        type="password"
+                        placeholder="Confirm Password"
+                        class="w-full p-2 rounded bg-gray-700 text-white"
+                        required
+                    />
                     <button
                         type="submit"
                         class="p-3 rounded-lg bg-blue-600 text-white hover:bg-blue-700 transition duration-300 w-full"
                     >
-                        Sign In
+                        Sign Up
                     </button>
                 </form>
                 <div class="flex items-center justify-center w-full my-4">
@@ -99,17 +118,17 @@ const loginWithForm = async () => {
                 </div>
                 <button
                     type="button"
-                    @click="loginWithGoogle"
+                    @click="signupWithGoogle"
                     class="p-3 rounded-lg bg-red-600 text-white hover:bg-red-700 transition duration-300 w-full"
                 >
-                    Login with Google
+                    Sign Up with Google
                 </button>
                 <div class="mt-4">
                     <router-link
-                        to="/auth/signup"
+                        to="/auth/login"
                         class="text-blue-500 hover:underline"
                     >
-                        Don't have an account? Sign up
+                        Already have an account? Log in
                     </router-link>
                 </div>
             </div>
