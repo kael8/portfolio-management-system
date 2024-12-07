@@ -15,6 +15,7 @@ use App\Http\Controllers\PostController;
 use App\Http\Controllers\ReactionController;
 use App\Http\Controllers\CommentController;
 use App\Http\Controllers\AccountController;
+use App\Http\Controllers\VisitorController;
 
 /*
 |--------------------------------------------------------------------------
@@ -31,6 +32,9 @@ use App\Http\Controllers\AccountController;
 Route::post('/login', function (Request $request) {
     return 'Success';
 });
+
+Route::post('/log-visitor', [VisitorController::class, 'logVisitor']);
+Route::get('/visitors', [VisitorController::class, 'getVisitors']);
 
 Route::get('/profile', [ProfileController::class, 'getProfile']);
 Route::get('/profile-image', [ProfileController::class, 'getProfileImage']);

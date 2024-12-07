@@ -1,6 +1,6 @@
 <script setup>
 import Navbar from "@/components/Navbar.vue";
-import { reactive, onMounted } from "vue";
+import { reactive } from "vue";
 import { useToast } from "vue-toastification";
 import Cookies from "js-cookie";
 import axios from "axios";
@@ -9,11 +9,17 @@ import router from "@/router";
 const form = reactive({
     email: "",
     password: "",
+    agreeToTerms: false,
 });
 
 const toast = useToast();
 
 const loginWithGoogle = async () => {
+    if (!form.agreeToTerms) {
+        toast.error("You must agree to the terms and conditions");
+        return;
+    }
+
     try {
         window.location.href = "/api/auth/google";
     } catch (error) {
@@ -31,6 +37,11 @@ const loginWithGoogle = async () => {
 };
 
 const loginWithForm = async () => {
+    if (!form.agreeToTerms) {
+        toast.error("You must agree to the terms and conditions");
+        return;
+    }
+
     try {
         const response = await axios.post("/api/auth/signin", {
             email: form.email,
@@ -85,6 +96,31 @@ const loginWithForm = async () => {
                         class="w-full p-2 rounded bg-gray-700 text-white"
                         required
                     />
+                    <div class="flex items-center">
+                        <input
+                            v-model="form.agreeToTerms"
+                            type="checkbox"
+                            id="agreeToTerms"
+                            class="mr-2"
+                            required
+                        />
+                        <label for="agreeToTerms" class="text-gray-400">
+                            I agree to the
+                            <router-link
+                                to="/terms-and-conditions"
+                                class="text-blue-500 hover:underline"
+                            >
+                                terms and conditions
+                            </router-link>
+                            and
+                            <router-link
+                                to="/privacy-policy"
+                                class="text-blue-500 hover:underline"
+                            >
+                                privacy policy </router-link
+                            >.
+                        </label>
+                    </div>
                     <button
                         type="submit"
                         class="p-3 rounded-lg bg-blue-600 text-white hover:bg-blue-700 transition duration-300 w-full"
@@ -100,8 +136,9 @@ const loginWithForm = async () => {
                 <button
                     type="button"
                     @click="loginWithGoogle"
-                    class="p-3 rounded-lg bg-red-600 text-white hover:bg-red-700 transition duration-300 w-full"
+                    class="p-3 rounded-lg bg-red-600 text-white hover:bg-red-700 transition duration-300 w-full mt-4 flex items-center justify-center"
                 >
+                    <i class="fab fa-google mr-2"></i>
                     Login with Google
                 </button>
                 <div class="mt-4">

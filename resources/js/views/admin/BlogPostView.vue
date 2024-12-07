@@ -126,10 +126,10 @@ const removeImageInput = (index) => {
             <transition name="modal">
                 <div
                     v-if="showModal"
-                    class="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50 z-50"
+                    class="fixed inset-0 flex items-center justify-center z-50"
                 >
                     <div
-                        class="bg-gray-800 w-full max-w-2xl p-6 rounded-lg shadow-lg text-gray-400 overflow-y-auto max-h-[90vh]"
+                        class="bg-gray-800 w-full max-w-2xl p-6 rounded-lg shadow-lg border border-gray-950 text-gray-400 overflow-y-auto max-h-[90vh]"
                     >
                         <!-- Modal Header -->
                         <div class="flex items-center mb-4">

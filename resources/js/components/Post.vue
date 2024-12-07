@@ -158,11 +158,22 @@
             </div>
         </div>
     </div>
+    <div
+        v-else
+        class="flex flex-col w-full justify-center h-screen items-center"
+    >
+        <div class="w-full bg-gray-800 md:rounded-lg shadow-2xl mb-60 py-10">
+            <div class="flex flex-col w-full pt-4 px-4 md:p-6 text-white">
+                <h1 class="text-2xl font-bold text-center">No posts found</h1>
+            </div>
+        </div>
+    </div>
     <LoginPromptModal
         :show="showLoginPrompt"
         @close="showLoginPrompt = false"
     />
     <SwitchHide
+        v-if="authState.isAuthenticated"
         main-action-label="Open menu"
         main-action-icon="fas fa-plus"
         :actions="actions"

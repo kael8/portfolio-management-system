@@ -10,16 +10,15 @@ return new class extends Migration {
      */
     public function up()
     {
-        Schema::create('visitors', function (Blueprint $table) {
-            $table->id();
-            $table->string('ip_address');
-            $table->string('user_agent')->nullable();
-            $table->timestamps();
+        Schema::table('visitors', function (Blueprint $table) {
+            $table->date('last_visited_at')->nullable();
         });
     }
 
     public function down()
     {
-        Schema::dropIfExists('visitors');
+        Schema::table('visitors', function (Blueprint $table) {
+            $table->dropColumn('last_visited_at');
+        });
     }
 };

@@ -92,7 +92,7 @@ onMounted(() => {
             class="flex flex-col w-full h-full items-center text-white justify-center p-6 mb-8"
         >
             <div
-                class="flex flex-col items-center w-full px-5 mb-10 rounded-md bg-gray-800"
+                class="flex flex-col items-center w-full p-5 mb-10 rounded-md bg-gray-800"
             >
                 <h1 class="text-4xl font-bold mb-6 w-full">
                     Profile Information

@@ -11,6 +11,8 @@ import RedirectView from "@/views/RedirectView.vue";
 import BlogView from "@/views/BlogView.vue";
 import BlogPostView from "../views/admin/BlogPostView.vue";
 import ProfileView from "@/views/admin/ProfileView.vue";
+import TermsAndConditionsView from "@/views/TermsAndConditionsView.vue";
+import PrivacyPolicyView from "@/views/PrivacyPolicyView.vue";
 import { setAuthState, setIsOwner } from "@/services/auth";
 
 const router = createRouter({
@@ -67,6 +69,16 @@ const router = createRouter({
             name: "Redirect",
             component: RedirectView,
             meta: { requiresAuth: false },
+        },
+        {
+            path: "/terms-and-conditions",
+            name: "Terms and Conditions",
+            component: TermsAndConditionsView,
+        },
+        {
+            path: "/privacy-policy",
+            name: "Privacy Policy",
+            component: PrivacyPolicyView,
         },
         {
             path: "/admin/:pathMatch(.*)*",

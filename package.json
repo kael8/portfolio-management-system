@@ -19,10 +19,12 @@
         "vue": "^3.5.13"
     },
     "dependencies": {
+        "@fingerprintjs/fingerprintjs": "^4.5.1",
         "@fortawesome/fontawesome-free": "^6.7.1",
         "@heroicons/vue": "^2.2.0",
         "@webzlodimir/vue-reactions": "^0.0.3",
         "animejs": "^3.2.2",
+        "chart.js": "^4.4.7",
         "date-fns": "^4.1.0",
         "date-fns-tz": "^3.2.0",
         "flowbite": "^2.5.2",
@@ -30,6 +32,7 @@
         "swiper": "^11.1.15",
         "tailwind-scrollbar": "^3.1.0",
         "uuid": "^11.0.3",
+        "vue-chartjs": "^5.3.2",
         "vue-router": "^4.0.13",
         "vue-spinner": "^1.0.4",
         "vue-toastification": "^2.0.0-rc.5"

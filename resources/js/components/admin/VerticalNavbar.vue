@@ -31,36 +31,29 @@ const navbarClasses = computed(() => ({
         >
             <RouterLink
                 to="/admin/dashboard"
-                class="p-2 hover:bg-gray-700 flex items-center w-full"
+                class="p-2 hover:bg-gray-700 flex items-center w-full justify-between"
                 :class="{ 'bg-gray-700': isActiveLink('/admin/dashboard') }"
             >
-                Dashboard
+                Dashboard <span v-if="!isOwner">(Admin only)</span>
             </RouterLink>
             <RouterLink
                 to="/admin/manage"
-                class="p-2 hover:bg-gray-700 flex items-center w-full"
+                class="p-2 hover:bg-gray-700 flex items-center w-full justify-between"
                 :class="{ 'bg-gray-700': isActiveLink('/admin/manage') }"
             >
-                Manage Portfolio
+                Manage Portfolio <span v-if="!isOwner">(Admin only)</span>
             </RouterLink>
             <RouterLink
                 to="/admin/blog-post"
-                class="p-2 hover:bg-gray-700 flex items-center w-full"
+                class="p-2 hover:bg-gray-700 flex items-center w-full justify-between"
                 :class="{ 'bg-gray-700': isActiveLink('/admin/blog-post') }"
             >
-                Blog Posts
+                Blog Posts <span v-if="!isOwner">(Admin only)</span>
             </RouterLink>
         </div>
         <div
             class="flex flex-col items-center justify-center border-b border-gray-700"
         >
-            <RouterLink
-                to="/admin/settings"
-                class="p-2 hover:bg-gray-700 flex items-center w-full"
-                :class="{ 'bg-gray-700': isActiveLink('/admin/settings') }"
-            >
-                Settings
-            </RouterLink>
             <RouterLink
                 to="/admin/profile"
                 class="p-2 hover:bg-gray-700 flex items-center w-full"

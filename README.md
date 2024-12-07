@@ -2,7 +2,7 @@
 
 ## About Portfolio Management System
 
-Portfolio Management System is a web application designed to help developers manage their portfolios efficiently. It provides features such as project creation, editing, deletion, and image uploads, all within an intuitive and user-friendly interface. The system also allows developers to showcase their skills, works, contact information, and about section. In the future, a blog feature may be added where guests can react or comment.
+Portfolio Management System is a web application designed to help developers manage their portfolios efficiently. It provides features such as project creation, editing, deletion, and image uploads, all within an intuitive and user-friendly interface. The system also allows developers to showcase their skills, works, contact information, and about section. Additionally, it includes a blog feature where guests can react or comment, with an option to set their comments as anonymous.
 
 ## Features
 
@@ -14,7 +14,8 @@ Portfolio Management System is a web application designed to help developers man
 -   **Works Showcase**: Display your completed works and projects.
 -   **Contact Information**: Provide your contact details for potential clients or collaborators.
 -   **About Section**: Share information about yourself and your professional background.
--   **Future Blog Feature**: A blog feature may be added where guests can react or comment on posts.
+-   **Blog Feature**: A blog feature where guests can react or comment on posts, with an option to set comments as anonymous.
+-   **User Authentication**: Form signup, login, and Google login using their name and email from Google.
 
 ## Technologies Used
 
@@ -67,6 +68,12 @@ To get started with the Portfolio Management System, follow these steps:
 3. **Edit or delete a project**:
    Use the "Edit" and "Delete" buttons on each project card to manage your projects.
 
+4. **Sign up or log in**:
+   Use the signup form to create a new account or log in with your existing credentials. You can also use Google login to sign in with your Google account.
+
+5. **Interact with the blog**:
+   Visit the blog page to read posts, react to them, and leave comments. You can choose to set your comments as anonymous if you prefer.
+
 ## Contributing
 
 We welcome contributions to the Portfolio Management System! If you would like to contribute, please follow these steps:
@@ -83,4 +90,4 @@ The Portfolio Management System is open-sourced software licensed under the [MIT
 
 ## Contact
 
-If you have any questions or feedback, please feel free to contact us at [your-email@example.com](mailto:your-email@example.com).
+If you have any questions or feedback, please feel free to contact us at [arcaylmaisog8@gmail.com](mailto:arcaylmaisog8@gmail.com).
